@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: auro_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: Auro1234
+      POSTGRES_PASSWORD: passwordAuro
+      POSTGRES_DB: databaseAuro
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+#Docker Starten
+# docker-compose up (Startet die Container im Vordergrund)
+# docker-compose up -d (Startet die Container im Hintergrund)
+
+#Docker Stoppen
+# docker-compose down
+
+#Container + Volumes löschen
+# docker-compose down --volumes
+
+#Docker komplett aufräumen
+# docker system prune
+
+#Ungenutzte Images löschen
+# docker system prune -a
+
+#Alle laufende Container zeigen
+# docker-compose ps
+
+#Logs eines bestimmten Services anzeigen
+# docker-compose logs <service-name>
+
+#Logs live verfolgen
+# docker-compose logs -f <service-name>

@@ -1,0 +1,13 @@
+-----!! Updaten !!----
+
+Gestern Kurs : regularMarketPrice
+Aktueller Kurs : preMarketChange
+Aktueller Kurs Prozent : preMarketChangePercent
+
+Tagesspanne : regularMarketDayRange
+52-Wochen-Spanne : fiftyTwoWeekRange
+Volumen : regularMarketVolume
+Markt Kapital : marketCap
+KGV letzte 12 Monate : trailingPE
+Erwartete Dividende : span.value.yf-dudngy
+1-Jahres-Ziel : targetMeanPrice
