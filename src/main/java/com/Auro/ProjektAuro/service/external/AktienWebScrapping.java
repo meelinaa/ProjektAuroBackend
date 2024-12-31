@@ -1,7 +1,6 @@
 package com.Auro.ProjektAuro.service.external;
 
 import java.time.LocalTime;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,67 +9,51 @@ import org.springframework.stereotype.Service;
 @Service
 public class AktienWebScrapping {
 
-     public boolean isRegularMarket(){
+    public boolean isRegularMarket() {
         LocalTime boersenBeginn = LocalTime.of(15, 30);
         LocalTime aktuelleZeit = LocalTime.now();
         return aktuelleZeit.isAfter(boersenBeginn);
     }
 
-    public AktienScrappingDatenLive reloadStockPriceMarket(String ticker){
-        String changePercent;
-        String change;
-        String price;
-/*
-        //Unterschiedliche Ausgaben, abhängig welcher Markt offen ist
-        if (isRegularMarket()) {
-            changePercent = "regularMarketChangePercent";
-            change = "regularMarketChange";
-            price = "regularMarketPrice";
-            
-        }
-        else{
-            changePercent = "preMarketChangePercent";
-            change = "preMarketChange";
-            price = "preMarketPrice";
-        }
-*/
-        //scrapping JSoup 
-        //alles was immer wieder geladen werden soll
+    public AktienScrappingDatenLive reloadStockPriceMarket(String ticker) {
         try {
-            String url = "https://de.finance.yahoo.com/quote/" + ticker + "/";
-            
-            Document document = Jsoup.connect(url)
-                                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-                                    .get();
-            
-                                    Element marketChangePercentElement = document.selectFirst("fin-streamer[data-field=postMarketChangePercent]");
-                                    Element marketChangeElement = document.selectFirst("fin-streamer[data-field=postMarketChange]");
-                                    Element marketPriceElement = document.selectFirst("fin-streamer[data-field=postMarketPrice]");
-                                    
-            Double marketPrice = (marketPriceElement != null) ? Math.round(Double.parseDouble(marketPriceElement.attr("data-value")) * 100.0) / 100.0 : null;
-            Double marketChangePercent = (marketChangePercentElement != null) ? Math.round(Double.parseDouble(marketChangePercentElement.attr("data-value")) * 100.0) / 100.0 : null;
-            Double marketChange = (marketChangeElement != null) ? Math.round(Double.parseDouble(marketChangeElement.attr("data-value")) * 100.0) / 100.0 : null;
-            
-            AktienScrappingDatenLive aktienDaten = new AktienScrappingDatenLive(marketPrice,
-                                                                                marketChangePercent,
-                                                                                marketChange,
-                                                                                ticker);
+            String changePercentField = isRegularMarket() ? "regularMarketChangePercent" : "preMarketChangePercent";
+            String changeField = isRegularMarket() ? "regularMarketChange" : "preMarketChange";
+            String priceField = isRegularMarket() ? "regularMarketPrice" : "preMarketPrice";
 
-            return aktienDaten;
-            
+            String url = "https://de.finance.yahoo.com/quote/" + ticker + "/";
+            Document document = Jsoup.connect(url)
+                                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+                                     .get();
+
+            Element marketChangePercentElement = document.selectFirst("fin-streamer[data-field=" + changePercentField + "]");
+            Element marketChangeElement = document.selectFirst("fin-streamer[data-field=" + changeField + "]");
+            Element marketPriceElement = document.selectFirst("fin-streamer[data-field=" + priceField + "]");
+
+            Double marketPrice = parseElementToDouble(marketPriceElement);
+            Double marketChangePercent = parseElementToDouble(marketChangePercentElement);
+            Double marketChange = parseElementToDouble(marketChangeElement);
+
+            return new AktienScrappingDatenLive(marketPrice, marketChangePercent, marketChange, ticker);
+
         } catch (Exception e) {
             System.err.println("Fehler beim Scraping: " + e.getMessage());
-            return null; 
+            return null;
         }
     }
 
+    private Double parseElementToDouble(Element element) {
+        if (element != null && element.hasAttr("data-value")) {
+            return Math.round(Double.parseDouble(element.attr("data-value")) * 100.0) / 100.0;
+        }
+        return null;
+    }
+
     public AktienScrappingDatenInfos scrapeStockInfos(String ticker) {
-        //alles was nur einmal geladen und nicht gespeichert werden muss
         try {
             String url = "https://de.finance.yahoo.com/quote/" + ticker + "/";
-            
             Document document = Jsoup.connect(url).get();
-            
+
             Element companyNameElement = document.selectFirst("h1.yf-xxbei9");
             Element regularMarketDayRangeElement = document.selectFirst("fin-streamer[data-field=regularMarketDayRange]");
             Element fiftyTwoWeekRangeElement = document.selectFirst("fin-streamer[data-field=fiftyTwoWeekRange]");
@@ -89,21 +72,19 @@ public class AktienWebScrapping {
             String targetMeanPrice = (targetMeanPriceElement != null) ? targetMeanPriceElement.attr("data-value") : "targetMeanPrice nicht gefunden";
             String expectedDividend = (expectedDividendElement != null) ? expectedDividendElement.text() : "expectedDividend nicht gefunden";
 
-            AktienScrappingDatenInfos aktienDaten = new AktienScrappingDatenInfos(companyName,
-                                                                        regularMarketDayRange,
-                                                                        fiftyTwoWeekRange,
-                                                                        regularMarketVolume,
-                                                                        marketCap,
-                                                                        trailingPE,
-                                                                        targetMeanPrice,
-                                                                        expectedDividend,
-                                                                        ticker);
-            return aktienDaten;
+            return new AktienScrappingDatenInfos(companyName, 
+                                                    regularMarketDayRange, 
+                                                    fiftyTwoWeekRange, 
+                                                    regularMarketVolume, 
+                                                    marketCap, 
+                                                    trailingPE, 
+                                                    targetMeanPrice, 
+                                                    expectedDividend, 
+                                                    ticker);
 
         } catch (Exception e) {
             System.err.println("Fehler beim Scraping: " + e.getMessage());
             return null;
         }
     }
-
 }
