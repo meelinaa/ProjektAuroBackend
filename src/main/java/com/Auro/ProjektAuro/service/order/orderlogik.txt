@@ -1,5 +1,0 @@
-datenbank zugriff über repositorx und testen ob es existiert und allgemein speichern
-und dann darüber kann ich das dann bearbeiten
-gut für handeln und um aktien zu speichern
-
-User user = userRepository .. throw error  dies das 

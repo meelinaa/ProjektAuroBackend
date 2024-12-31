@@ -23,10 +23,4 @@ public class Portfolio {
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders; 
-
-    private Double gesamtWertPotfolio;
-    
-    private Double gesamtPerformance;
-
-    private Double gesamtRendite;
 }

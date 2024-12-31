@@ -2,6 +2,8 @@ package com.Auro.ProjektAuro.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,7 +27,8 @@ public class Order {
     private Aktie aktie;
 
     @ManyToOne
-    @JoinColumn(name = "portfolio_id", nullable = false)
+    @JsonIgnore
+    @JoinColumn(name = "portfolio_id") 
     private Portfolio portfolio;
 
     private LocalDateTime orderDateAndTime;
@@ -34,5 +37,5 @@ public class Order {
 
     private Double aktie_anteile;
 
-    private Double aktuellerKurs;
+    private Double buySellKurs;
 }

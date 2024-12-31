@@ -1,6 +1,8 @@
 package com.Auro.ProjektAuro.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -18,8 +20,12 @@ public class Aktie {
 
     private String name;
 
-    @Column(nullable = false, unique = true)
     private String isin;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "portfolio_id") 
+    private Portfolio portfolio;
 
     private Double aktuellerKurs;
 
@@ -27,15 +33,11 @@ public class Aktie {
 
     private Double anzahlAktienAnteile;
 
-    private Double renditeProzent;
+    //on the fly
+    //private Double renditeProzent;
+    //private Double renditeGeldWert;
+    //private Double gesamtPerformance;
+    //private Double aktuellerGesamtWert;
 
-    private Double renditeGeldWert;
-
-    private Double gesamtPerformance;
-
-    private Double aktuellerGesamtWert;
-
-    @ManyToOne
-    @JoinColumn(name = "portfolio_id", nullable = false)
-    private Portfolio portfolio;
+    
 }

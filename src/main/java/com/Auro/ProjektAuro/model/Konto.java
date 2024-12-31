@@ -17,5 +17,5 @@ public class Konto {
 
     private String name = "Konto von Melina";
 
-    private Double kontoGuthaben;
+    private Double aktuellesKontoGuthaben;
 }

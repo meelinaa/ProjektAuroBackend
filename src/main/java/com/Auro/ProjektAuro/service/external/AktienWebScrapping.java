@@ -20,7 +20,7 @@ public class AktienWebScrapping {
         String changePercent;
         String change;
         String price;
-
+/*
         //Unterschiedliche Ausgaben, abhängig welcher Markt offen ist
         if (isRegularMarket()) {
             changePercent = "regularMarketChangePercent";
@@ -33,7 +33,7 @@ public class AktienWebScrapping {
             change = "preMarketChange";
             price = "preMarketPrice";
         }
-
+*/
         //scrapping JSoup 
         //alles was immer wieder geladen werden soll
         try {
@@ -43,10 +43,10 @@ public class AktienWebScrapping {
                                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
                                     .get();
             
-            Element marketChangePercentElement = document.selectFirst("fin-streamer[data-field=" + changePercent + "}]");
-            Element marketChangeElement = document.selectFirst("fin-streamer[data-field=" + change + "}]");
-            Element marketPriceElement = document.selectFirst("fin-streamer[data-field=" + price + "}]");
-
+                                    Element marketChangePercentElement = document.selectFirst("fin-streamer[data-field=postMarketChangePercent]");
+                                    Element marketChangeElement = document.selectFirst("fin-streamer[data-field=postMarketChange]");
+                                    Element marketPriceElement = document.selectFirst("fin-streamer[data-field=postMarketPrice]");
+                                    
             Double marketPrice = (marketPriceElement != null) ? Math.round(Double.parseDouble(marketPriceElement.attr("data-value")) * 100.0) / 100.0 : null;
             Double marketChangePercent = (marketChangePercentElement != null) ? Math.round(Double.parseDouble(marketChangePercentElement.attr("data-value")) * 100.0) / 100.0 : null;
             Double marketChange = (marketChangeElement != null) ? Math.round(Double.parseDouble(marketChangeElement.attr("data-value")) * 100.0) / 100.0 : null;
