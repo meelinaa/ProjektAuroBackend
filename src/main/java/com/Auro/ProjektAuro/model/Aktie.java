@@ -33,11 +33,6 @@ public class Aktie {
 
     private Double anzahlAktienAnteile;
 
-    //on the fly
-    //private Double renditeProzent;
-    //private Double renditeGeldWert;
-    //private Double gesamtPerformance;
-    //private Double aktuellerGesamtWert;
-
+    
     
 }

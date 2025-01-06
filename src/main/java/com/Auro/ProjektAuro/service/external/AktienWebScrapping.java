@@ -17,6 +17,8 @@ public class AktienWebScrapping {
 
     public AktienScrappingDatenLive reloadStockPriceMarket(String ticker) {
         try {
+            //wenn keine Zahlen angezeigt werden, dann ist es entweder "pre" oder "post". Das ändert sich ja immerwieder
+            //ein Test hinzugüfen, dass das auf die änderungen reagieren kann
             String changePercentField = isRegularMarket() ? "regularMarketChangePercent" : "preMarketChangePercent";
             String changeField = isRegularMarket() ? "regularMarketChange" : "preMarketChange";
             String priceField = isRegularMarket() ? "regularMarketPrice" : "preMarketPrice";
@@ -30,11 +32,22 @@ public class AktienWebScrapping {
             Element marketChangeElement = document.selectFirst("fin-streamer[data-field=" + changeField + "]");
             Element marketPriceElement = document.selectFirst("fin-streamer[data-field=" + priceField + "]");
 
+            if (marketPriceElement == null) {
+                marketChangePercentElement = document.selectFirst("fin-streamer[data-field=regularMarketChangePercent]");
+                marketChangeElement = document.selectFirst("fin-streamer[data-field=regularMarketChange]");
+                marketPriceElement = document.selectFirst("fin-streamer[data-field=regularMarketPrice]");
+            } else {
+                
+            }
+
             Double marketPrice = parseElementToDouble(marketPriceElement);
             Double marketChangePercent = parseElementToDouble(marketChangePercentElement);
             Double marketChange = parseElementToDouble(marketChangeElement);
 
-            return new AktienScrappingDatenLive(marketPrice, marketChangePercent, marketChange, ticker);
+            return new AktienScrappingDatenLive(marketPrice, 
+                                                marketChangePercent, 
+                                                marketChange, 
+                                                ticker);
 
         } catch (Exception e) {
             System.err.println("Fehler beim Scraping: " + e.getMessage());
@@ -81,7 +94,6 @@ public class AktienWebScrapping {
                                                     targetMeanPrice, 
                                                     expectedDividend, 
                                                     ticker);
-
         } catch (Exception e) {
             System.err.println("Fehler beim Scraping: " + e.getMessage());
             return null;
