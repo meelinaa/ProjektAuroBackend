@@ -49,9 +49,7 @@ public class PortfolioController {
     public ResponseEntity<List<Aktie>> getAlleAktienFuerPortfolio(@PathVariable Integer id) {
         List<Aktie> allePortfolioAktien = portfolioService.getAllAktienById(id);
 
-        if (allePortfolioAktien.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Optional: Entscheide, ob 404 für eine leere Liste sinnvoll ist.
-        }
+        
 
         return ResponseEntity.ok(allePortfolioAktien); // Rückgabe der Aktienliste mit 200 OK
     }

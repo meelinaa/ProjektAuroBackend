@@ -13,18 +13,17 @@ public class AktienService {
 
     public AktiePosition getPosition(String ticker) {
         if (!aktieRepository.existsById(ticker)) {
-            return new AktiePosition(null, null, null);
+            return new AktiePosition(null, null);
         }
 
         try {
-            Double aktuellerKurs = aktieRepository.getAktuellerKursByTicker(ticker);
             Double buyInKurs = aktieRepository.getBuyInKursByTicker(ticker);
             Double anzahlAktienAnteile = aktieRepository.getAnzahlAktienAnteileByTicker(ticker);
 
-            return new AktiePosition(aktuellerKurs, buyInKurs, anzahlAktienAnteile);
+            return new AktiePosition(buyInKurs, anzahlAktienAnteile);
         } catch (Exception e) {
             System.err.println("Fehler beim Abrufen der Aktie: " + e.getMessage());
-            return new AktiePosition(null, null, null);
+            return new AktiePosition(null, null);
         }
     }
 

@@ -23,15 +23,15 @@ public class Order {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name="aktien_id", nullable = false)
-    private Aktie aktie;
-
-    @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "portfolio_id") 
     private Portfolio portfolio;
 
     private LocalDateTime orderDateAndTime;
+
+    private String aktienTicker;
+
+    private String aktienName;
 
     private String orderType;
 

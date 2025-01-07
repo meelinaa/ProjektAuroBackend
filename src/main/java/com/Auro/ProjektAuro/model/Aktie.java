@@ -20,19 +20,12 @@ public class Aktie {
 
     private String name;
 
-    private String isin;
-
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "portfolio_id") 
     private Portfolio portfolio;
 
-    private Double aktuellerKurs;
-
     private Double buyInKurs;
 
     private Double anzahlAktienAnteile;
-
-    
-    
 }
