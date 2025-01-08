@@ -1,6 +1,7 @@
 package com.Auro.ProjektAuro.service.order;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.management.RuntimeErrorException;
 
@@ -111,5 +112,9 @@ public class OrderService {
         kontoRepository.save(konto);
 
     }    
+
+    public List<Order> getTransaktionen(){
+        return orderRepository.findAll();
+    }
 }
 
