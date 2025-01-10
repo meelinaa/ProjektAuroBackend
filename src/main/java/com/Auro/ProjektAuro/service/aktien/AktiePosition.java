@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class AktiePosition {
+
     private Double buyInKurs;
     private Double anzahlAktienAnteile;
 
@@ -12,4 +13,5 @@ public class AktiePosition {
         this.buyInKurs = buyInKurs;
         this.anzahlAktienAnteile = anzahlAktienAnteile;
     }
+    
 }

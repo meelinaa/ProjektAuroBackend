@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class TransaktionenDto {
+
     private LocalDateTime orderDateAndTime;
     private String aktienTicker;
     private String aktienName;
@@ -27,4 +28,5 @@ public class TransaktionenDto {
         this.aktie_anteile = aktie_anteile;
         this.buySellKurs = buySellKurs;
     }
+    
 }

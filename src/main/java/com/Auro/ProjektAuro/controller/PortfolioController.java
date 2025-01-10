@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
-
 @RestController
 @RequestMapping("/portfolio")
 public class PortfolioController {
@@ -27,7 +25,6 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    //Komplette Portfolio Infos nach ID
     @GetMapping("/{id}")
     public ResponseEntity<Portfolio> getPortfolio(@PathVariable String id) {
         try{
@@ -44,14 +41,11 @@ public class PortfolioController {
         }
     }
     
-    //Alle Aktien aufgezählt aus der ID
     @GetMapping("/aktien/get/{id}")
     public ResponseEntity<List<Aktie>> getAlleAktienFuerPortfolio(@PathVariable Integer id) {
         List<Aktie> allePortfolioAktien = portfolioService.getAllAktienById(id);
 
-        
-
-        return ResponseEntity.ok(allePortfolioAktien); // Rückgabe der Aktienliste mit 200 OK
+        return ResponseEntity.ok(allePortfolioAktien); 
     }
 
     @GetMapping("/order/get/{id}")
@@ -59,80 +53,10 @@ public class PortfolioController {
         List<Order> allePortfolioOrder = portfolioService.getAlleOrdersByID(id);
 
         if (allePortfolioOrder.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Optional: Entscheide, ob 404 für eine leere Liste sinnvoll ist.
-        }
-
-        return ResponseEntity.ok(allePortfolioOrder); // Rückgabe der Aktienliste mit 200 OK
-    }
-    
-    /*
-    @GetMapping("/gesamtperformance/{id}")
-    public ResponseEntity<Double> getGesamtPerformance(@PathVariable Integer id) {
-        Double gesamtPerformance = portfolioService.getGesamtPerformance(id);
-
-        if (gesamtPerformance != null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Optional: Entscheide, ob 404 für eine leere Liste sinnvoll ist.
-        }
-
-        return ResponseEntity.ok(gesamtPerformance);
-
-    }
-        */
-
-   
-    
-    
-
-    // -- TAKTISCH UNKLUG: LIEBER ON THE FLY LIVE BERECHNEN AUS DEN AKTIEN DIE IN DEM PORTFOLIO SIND; STATT DANN DIE SACHEN EXTRA TAUSENDFACH ABZUSPEUICHERN UND ZU BERECHNEN
-
-    /*
-    //Alle Zusammengefasste Werte
-    @GetMapping("/gesamtwert/{id}")
-    public ResponseEntity<Double> getGesammtenWert(@PathVariable Integer id) {
-        Double gesamtWert = portfolioService.getGesamtWertById(id);
-
-        if( gesamtWert != null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        return ResponseEntity.ok(gesamtWert);
+        return ResponseEntity.ok(allePortfolioOrder);
     }
     
-    //Summe aus jeder Rendite
-    @GetMapping("/rendite/{id}")
-    public ResponseEntity<Double> getRendite(@PathVariable String id) {
-        try{
-            Integer portfolioId = Integer.parseInt(id);
-            Double rendite = portfolioService.rendite(portfolioId);
-
-            if(rendite != null){
-                return ResponseEntity.ok(rendite);
-            }else{
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-        } catch (NumberFormatException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-
-
-    
-    //Summe aus jeder Performance
-    @GetMapping("/performance/{id}")
-    public ResponseEntity<Double> getPerformance(@PathVariable String id) {
-        try {
-            Integer portfolioId = Integer.parseInt(id);
-            Double performance = portfolioService.performance(portfolioId);
-        
-            if (performance != null) {
-                return ResponseEntity.ok(performance);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-        } catch (NumberFormatException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }   
-        */
 }

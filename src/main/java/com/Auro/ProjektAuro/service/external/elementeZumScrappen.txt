@@ -1,8 +1,7 @@
------!! Updaten !!----
 
-Gestern Kurs : regularMarketPrice
-Aktueller Kurs : preMarketChange
-Aktueller Kurs Prozent : preMarketChangePercent
+Gestern Kurs : regularMarketPrice / preMarketPrice
+Aktueller Kurs : regularMarketChange /preMarketChange
+Aktueller Kurs Prozent : regularMarketChangePercent / preMarketChangePercent
 
 Tagesspanne : regularMarketDayRange
 52-Wochen-Spanne : fiftyTwoWeekRange

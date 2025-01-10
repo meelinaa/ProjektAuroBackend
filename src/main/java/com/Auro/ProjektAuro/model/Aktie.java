@@ -1,6 +1,5 @@
 package com.Auro.ProjektAuro.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -28,4 +27,5 @@ public class Aktie {
     private Double buyInKurs;
 
     private Double anzahlAktienAnteile;
+    
 }

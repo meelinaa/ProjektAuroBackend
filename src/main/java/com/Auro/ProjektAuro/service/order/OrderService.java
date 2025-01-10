@@ -3,8 +3,6 @@ package com.Auro.ProjektAuro.service.order;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 import org.springframework.stereotype.Service;
 
 import com.Auro.ProjektAuro.model.Aktie;
@@ -63,6 +61,7 @@ public class OrderService {
         double gesamtInvesition;
         double neuerBuyInKurs;
 
+        // Order Type: BUY
         if ("buy".equals(orderDto.getOrderType())) {
             neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
             aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
@@ -77,7 +76,9 @@ public class OrderService {
             aktie.setAnzahlAktienAnteile(neueAnzahlAnteile);
             aktieRepository.save(aktie);
             
-        } else if("sell".equals(orderDto.getOrderType())){
+        } 
+        // Order Type: SELL
+        else if("sell".equals(orderDto.getOrderType())){
             neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() - orderDto.getAnteile();
             neuerBuyInKurs = aktie.getBuyInKurs();
 
@@ -110,8 +111,7 @@ public class OrderService {
 
         konto.setAktuellesKontoGuthaben(kontoGuthaben);
         kontoRepository.save(konto);
-
-    }    
+    }   
 
     public List<Order> getTransaktionen(){
         return orderRepository.findAll();

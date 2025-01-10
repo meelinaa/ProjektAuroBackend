@@ -1,6 +1,5 @@
 package com.Auro.ProjektAuro.service.aktien;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.Auro.ProjektAuro.repository.AktieRepository;
@@ -8,8 +7,11 @@ import com.Auro.ProjektAuro.repository.AktieRepository;
 @Service
 public class AktienService {
 
-    @Autowired
     private AktieRepository aktieRepository;
+
+    public AktienService(AktieRepository aktieRepository){
+        this.aktieRepository = aktieRepository;
+    }
 
     public AktiePosition getPosition(String ticker) {
         if (!aktieRepository.existsById(ticker)) {
@@ -26,6 +28,5 @@ public class AktienService {
             return new AktiePosition(null, null);
         }
     }
-
 
 }

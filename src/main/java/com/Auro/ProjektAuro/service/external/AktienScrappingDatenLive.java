@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class AktienScrappingDatenLive {
+
     private Double regularMarketPrice;
     private Double regularMarketChangePercent;
     private Double regularMarketChange;
@@ -19,4 +20,5 @@ public class AktienScrappingDatenLive {
         this.regularMarketChange = regularMarketChange;
         this.ticker = ticker;
     }
+    
 }

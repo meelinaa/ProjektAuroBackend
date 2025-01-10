@@ -15,10 +15,16 @@ public class AktienWebScrapping {
         return aktuelleZeit.isAfter(boersenBeginn);
     }
 
+    private Double parseElementToDouble(Element element) {
+        if (element != null && element.hasAttr("data-value")) {
+            return Math.round(Double.parseDouble(element.attr("data-value")) * 100.0) / 100.0;
+        }
+        return null;
+    }
+
+    // Alle Live Daten
     public AktienScrappingDatenLive reloadStockPriceMarket(String ticker) {
         try {
-            //wenn keine Zahlen angezeigt werden, dann ist es entweder "pre" oder "post". Das ändert sich ja immerwieder
-            //ein Test hinzugüfen, dass das auf die änderungen reagieren kann
             String changePercentField = isRegularMarket() ? "regularMarketChangePercent" : "preMarketChangePercent";
             String changeField = isRegularMarket() ? "regularMarketChange" : "preMarketChange";
             String priceField = isRegularMarket() ? "regularMarketPrice" : "preMarketPrice";
@@ -32,12 +38,11 @@ public class AktienWebScrapping {
             Element marketChangeElement = document.selectFirst("fin-streamer[data-field=" + changeField + "]");
             Element marketPriceElement = document.selectFirst("fin-streamer[data-field=" + priceField + "]");
 
+            // Für nicht amerikanische Aktien
             if (marketPriceElement == null) {
                 marketChangePercentElement = document.selectFirst("fin-streamer[data-field=regularMarketChangePercent]");
                 marketChangeElement = document.selectFirst("fin-streamer[data-field=regularMarketChange]");
                 marketPriceElement = document.selectFirst("fin-streamer[data-field=regularMarketPrice]");
-            } else {
-                
             }
 
             Double marketPrice = parseElementToDouble(marketPriceElement);
@@ -55,13 +60,7 @@ public class AktienWebScrapping {
         }
     }
 
-    private Double parseElementToDouble(Element element) {
-        if (element != null && element.hasAttr("data-value")) {
-            return Math.round(Double.parseDouble(element.attr("data-value")) * 100.0) / 100.0;
-        }
-        return null;
-    }
-
+    // Alle Informationen, die nicht regelmäßig geupdated werden müssen.
     public AktienScrappingDatenInfos scrapeStockInfos(String ticker) {
         try {
             String url = "https://de.finance.yahoo.com/quote/" + ticker + "/";
@@ -99,4 +98,5 @@ public class AktienWebScrapping {
             return null;
         }
     }
+
 }

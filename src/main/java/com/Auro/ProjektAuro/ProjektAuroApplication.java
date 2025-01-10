@@ -9,4 +9,5 @@ public class ProjektAuroApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ProjektAuroApplication.class, args);
 	}
+	
 }

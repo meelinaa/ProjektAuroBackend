@@ -35,4 +35,5 @@ public class AktienScrappingDatenInfos {
         this.expectedDividend = expectedDividend;
         this.ticker = ticker;
     }
+    
 }
