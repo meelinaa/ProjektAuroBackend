@@ -10,4 +10,7 @@ public interface KontoRepository extends JpaRepository<Konto, Integer>{
     @Query("SELECT k.aktuellesKontoGuthaben FROM Konto k WHERE k.id = :id")
     Double getGuthaben(Integer id);
 
+    @Query("SELECT n.name FROM Konto n WHERE n.id = :id")
+    String getName(Integer id);
+
 }

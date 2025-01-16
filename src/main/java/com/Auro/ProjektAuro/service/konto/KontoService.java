@@ -9,13 +9,18 @@ public class KontoService {
 
     private KontoRepository kontoRepository;
 
+    private Integer kontoID = 1;
+
     public KontoService(KontoRepository kontoRepository){
         this.kontoRepository = kontoRepository;
     }
 
     public Double getKontoGuthaben() {
-        Integer kontoID = 1;
         return kontoRepository.getGuthaben(kontoID);
+    }
+
+    public String getKontoName() {
+        return kontoRepository.getName(kontoID);
     }
     
 }

@@ -24,4 +24,5 @@ public class Konto {
     private String name;
 
     private Double aktuellesKontoGuthaben;
+    
 }
