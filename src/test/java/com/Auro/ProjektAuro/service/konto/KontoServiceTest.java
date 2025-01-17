@@ -2,7 +2,6 @@ package com.Auro.ProjektAuro.service.konto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -29,6 +28,7 @@ public class KontoServiceTest {
         kontoService = new KontoService(kontoRepository);
     }
 
+    // getKontoGuthaben
     @Test
     void testeGetKontoGuthabenMitKorrekterAusgabe(){
         kontoID = 1;
@@ -67,7 +67,7 @@ public class KontoServiceTest {
         verify(kontoRepository, never()).getGuthaben(kontoID);
     }
 
-
+    // getKontoName
     @Test
     void testeGetKontoNameMitKorrekterAusgabe(){
         when(kontoRepository.getName(kontoID)).thenReturn("Max Mustermann");
@@ -104,6 +104,5 @@ public class KontoServiceTest {
         assertEquals("Es existiert kein Konto mit dieser Id", exception.getMessage());
         verify(kontoRepository, never()).getGuthaben(kontoID);
     }
-
 
 }

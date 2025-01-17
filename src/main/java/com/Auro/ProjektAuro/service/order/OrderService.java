@@ -3,6 +3,7 @@ package com.Auro.ProjektAuro.service.order;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.Auro.ProjektAuro.model.Aktie;
@@ -16,14 +17,24 @@ import com.Auro.ProjektAuro.repository.OrderRepository;
 import com.Auro.ProjektAuro.repository.PortfolioRepository;
 
 @Service
+@Scope("prototype")
 public class OrderService {
 
+    private Order order;
+    private Konto konto;
+    private Aktie aktie;
+    private Portfolio portfolio;
+
+    private Double kontoGuthaben;
+    private Double neueAnzahlAnteile; 
+    private Double aktuelleInvestition;
+    private Double neueInvestition;
+    private Double gesamtInvesition;
+    private Double neuerBuyInKurs;
+
     private AktieRepository aktieRepository;
-
     private OrderRepository orderRepository;
-
     private PortfolioRepository portfolioRepository;
-
     private KontoRepository kontoRepository;
 
     public OrderService( AktieRepository aktieRepository, OrderRepository orderRepository, PortfolioRepository portfolioRepository, KontoRepository kontoRepository){
@@ -33,18 +44,40 @@ public class OrderService {
         this.kontoRepository = kontoRepository;
     }
 
+    // Main
     public void transaktion(OrderDto orderDto) {
-        Order order = new Order();
+        initialisiereObjekte(orderDto); 
+        
+        if ("buy".equals(orderDto.getOrderType())) {
+            transaktionBuy(orderDto);
+        } 
+        else if("sell".equals(orderDto.getOrderType())){
+            transaktionSell(orderDto);
+        } else {
+            throw new RuntimeException("Ungültiger OrderType: " + orderDto.getOrderType());
+        }
 
-        Konto konto = kontoRepository.findById(1)
+        setzeUndSpeichereObjekte(orderDto);
+    }   
+
+    // get
+    public List<Order> getTransaktionen(){
+        return orderRepository.findAll();
+    }
+
+    // Hilfsmethoden
+    public void initialisiereObjekte(OrderDto orderDto){
+        order = new Order();
+
+        konto = kontoRepository.findById(1)
             .orElseThrow(() -> new RuntimeException("Konto konnte nicht gefunden werden"));
         
-        double kontoGuthaben = kontoRepository.getGuthaben(1);
+        kontoGuthaben = kontoRepository.getGuthaben(1);
 
-        Portfolio portfolio = portfolioRepository.findById(1)
+        portfolio = portfolioRepository.findById(1)
             .orElseThrow(() -> new RuntimeException("Portfolio mit ID 1 nicht gefunden"));
 
-        Aktie aktie = aktieRepository.findById(orderDto.getTicker())
+        aktie = aktieRepository.findById(orderDto.getTicker())
             .orElseGet(() -> {
                 Aktie newAktie = new Aktie();
                 newAktie.setId(orderDto.getTicker());
@@ -53,52 +86,46 @@ public class OrderService {
                 newAktie.setName(orderDto.getCompanyName());
                 newAktie.setPortfolio(portfolio);
                 return aktieRepository.save(newAktie);
-            });
-    
-        double neueAnzahlAnteile; 
-        double aktuelleInvestition;
-        double neueInvestition;
-        double gesamtInvesition;
-        double neuerBuyInKurs;
+            });   
+    }
 
-        // Order Type: BUY
-        if ("buy".equals(orderDto.getOrderType())) {
-            neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
-            aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
-            neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
-            gesamtInvesition = aktuelleInvestition + neueInvestition;
-            neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+    public void transaktionBuy(OrderDto orderDto){
+        neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
+        aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
+        neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
+        gesamtInvesition = aktuelleInvestition + neueInvestition;
+        neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
 
-            //Konto: Guthaben abziehen
-            kontoGuthaben -= neueInvestition;
+        //Konto: Guthaben abziehen
+        kontoGuthaben -= neueInvestition;
 
-            aktie.setBuyInKurs(neuerBuyInKurs);
-            aktie.setAnzahlAktienAnteile(neueAnzahlAnteile);
-            aktieRepository.save(aktie);
-            
-        } 
-        // Order Type: SELL
-        else if("sell".equals(orderDto.getOrderType())){
-            neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() - orderDto.getAnteile();
-            neuerBuyInKurs = aktie.getBuyInKurs();
+        setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+    }
 
-            //Konto: Guthaben hinzufügen
-            double verkauf = orderDto.getAnteile() * orderDto.getLiveKurs();
-            kontoGuthaben += verkauf;
+    public void transaktionSell(OrderDto orderDto){
+        neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() - orderDto.getAnteile();
+        neuerBuyInKurs = aktie.getBuyInKurs();
 
-            if (neueAnzahlAnteile == 0) {
-                aktieRepository.delete(aktie);
-                System.out.println("Aktie gelöscht: " + aktie.getId());
-                return; 
-            }
+        //Konto: Guthaben hinzufügen
+        double verkauf = orderDto.getAnteile() * orderDto.getLiveKurs();
+        kontoGuthaben += verkauf;
 
-            aktie.setBuyInKurs(neuerBuyInKurs);
-            aktie.setAnzahlAktienAnteile(neueAnzahlAnteile);
-            aktieRepository.save(aktie);
-        } else {
-            throw new RuntimeException("Ungültiger OrderType: " + orderDto.getOrderType());
+        if (neueAnzahlAnteile == 0) {
+            aktieRepository.delete(aktie);
+            System.out.println("Aktie gelöscht: " + aktie.getId());
+            return; 
         }
 
+        setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+    }
+
+    public void setAktienAttributeUndSaveRepository(Double neuerBuyInKurs, Double neueAnzahlAnteile, Aktie aktie){
+        aktie.setBuyInKurs(neuerBuyInKurs);
+        aktie.setAnzahlAktienAnteile(neueAnzahlAnteile);
+        aktieRepository.save(aktie);
+    }
+
+    private void setzeUndSpeichereObjekte(OrderDto orderDto){
         order.setOrderDateAndTime(LocalDateTime.now());
         order.setOrderType(orderDto.getOrderType());
         order.setAktie_anteile(orderDto.getAnteile());
@@ -111,10 +138,6 @@ public class OrderService {
 
         konto.setAktuellesKontoGuthaben(kontoGuthaben);
         kontoRepository.save(konto);
-    }   
-
-    public List<Order> getTransaktionen(){
-        return orderRepository.findAll();
     }
+    
 }
-
