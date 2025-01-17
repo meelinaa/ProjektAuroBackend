@@ -53,5 +53,9 @@ public class AktienController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
+    public int add (int numberA, int numberB){
+        return numberA + numberB;
+    }
     
 }

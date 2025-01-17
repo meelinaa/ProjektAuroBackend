@@ -1,5 +1,7 @@
 package com.Auro.ProjektAuro.service.konto;
 
+import java.util.NoSuchElementException;
+
 import org.springframework.stereotype.Service;
 
 import com.Auro.ProjektAuro.repository.KontoRepository;
@@ -16,11 +18,26 @@ public class KontoService {
     }
 
     public Double getKontoGuthaben() {
-        return kontoRepository.getGuthaben(kontoID);
+        if(!kontoRepository.existsById(kontoID)){
+            throw new NoSuchElementException("Es existiert kein Konto mit dieser Id");
+        }
+        Double guthaben = kontoRepository.getGuthaben(kontoID);
+        if (guthaben == null) {
+            throw new IllegalStateException("Kein Guthaben für das Konto gefunden");
+        }
+        return guthaben;
     }
+    
 
     public String getKontoName() {
-        return kontoRepository.getName(kontoID);
+        if(!kontoRepository.existsById(kontoID)){
+            throw new NoSuchElementException("Es existiert kein Konto mit dieser Id");
+        }
+        String name = kontoRepository.getName(kontoID);
+        if (name == null) {
+            throw new IllegalStateException("Kein Name für das Konto gefunden");
+        }
+        return name;
     }
     
 }
