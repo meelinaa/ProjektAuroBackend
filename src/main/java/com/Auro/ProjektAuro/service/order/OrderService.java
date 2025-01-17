@@ -22,10 +22,10 @@ public class OrderService {
 
     private Order order;
     private Konto konto;
-    private Aktie aktie;
+    public Aktie aktie;
     private Portfolio portfolio;
 
-    private Double kontoGuthaben;
+    public Double kontoGuthaben;
     private Double neueAnzahlAnteile; 
     private Double aktuelleInvestition;
     private Double neueInvestition;
@@ -37,6 +37,8 @@ public class OrderService {
     private PortfolioRepository portfolioRepository;
     private KontoRepository kontoRepository;
 
+    private Boolean istAktieNeuErstellt;
+
     public OrderService( AktieRepository aktieRepository, OrderRepository orderRepository, PortfolioRepository portfolioRepository, KontoRepository kontoRepository){
         this.aktieRepository = aktieRepository;
         this.orderRepository = orderRepository;
@@ -47,6 +49,7 @@ public class OrderService {
     // Main
     public void transaktion(OrderDto orderDto) {
         initialisiereObjekte(orderDto); 
+        istAktieNeuErstellt = false;
         
         if ("buy".equals(orderDto.getOrderType())) {
             transaktionBuy(orderDto);
@@ -104,20 +107,27 @@ public class OrderService {
                 newAktie.setAnzahlAktienAnteile(orderDto.getAnteile());
                 newAktie.setName(orderDto.getCompanyName());
                 newAktie.setPortfolio(portfolio);
+                istAktieNeuErstellt = true;
                 return aktieRepository.save(newAktie);
             }); 
     }
 
     public void transaktionBuy(OrderDto orderDto){
-        neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
-        aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
-        neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
-        gesamtInvesition = aktuelleInvestition + neueInvestition;
-        neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+        if(!istAktieNeuErstellt){
+            neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
+            aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
+            neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
+            gesamtInvesition = aktuelleInvestition + neueInvestition;
+            neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+        }else{
+            neueAnzahlAnteile = orderDto.getAnteile();
+            neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
+            gesamtInvesition =  neueInvestition;
+            neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+        }
 
         //Konto: Guthaben abziehen
         kontoGuthaben -= neueInvestition;
-
         setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
     }
 
