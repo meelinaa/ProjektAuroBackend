@@ -28,13 +28,21 @@ public class AktienController {
     }    
 
     @GetMapping("/{ticker}/infos")
-    public AktienScrappingDatenInfos getInfosAktien(@PathVariable String ticker) {
-        return aktienScrapping.loadStockInfos(ticker);
+    public ResponseEntity<AktienScrappingDatenInfos> getInfosAktien(@PathVariable String ticker) {
+        try {
+            return ResponseEntity.ok(aktienScrapping.loadStockInfos(ticker));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @GetMapping("/{ticker}/live")
-    public AktienScrappingDatenLive getLiveZahlenAktien(@PathVariable String ticker) {
-        return aktienScrapping.reloadStockPrice(ticker);
+    public ResponseEntity<AktienScrappingDatenLive> getLiveZahlenAktien(@PathVariable String ticker) {
+        try {
+            return ResponseEntity.ok(aktienScrapping.reloadStockPrice(ticker));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }   
 
     @GetMapping("/{ticker}/positionen")
