@@ -77,12 +77,9 @@ public class OrderService {
     public void initialisiereObjekte(OrderDto orderDto){
         if (orderDto == null 
             || orderDto.getTicker() == null 
-            || orderDto.getTicker().isEmpty() 
             || orderDto.getLiveKurs() == null 
-            || orderDto.getAnteile() == null 
-            || orderDto.getAnteile() <= 0 
-            || orderDto.getCompanyName() == null 
-            || orderDto.getCompanyName().isEmpty()) {
+            || orderDto.getAnteile() == null
+            || orderDto.getCompanyName() == null) {
         throw new IllegalArgumentException("OrderDto ist ungültig oder unvollständig.");
         }
         order = new Order();
@@ -160,7 +157,9 @@ public class OrderService {
         order.setOrderType(orderDto.getOrderType());
         order.setAktie_anteile(orderDto.getAnteile());
         order.setBuySellKurs(orderDto.getLiveKurs());
+
         order.setPortfolio(portfolio);
+
         order.setAktienName(aktie.getName());
         order.setAktienTicker(aktie.getId());
     

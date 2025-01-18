@@ -3,12 +3,15 @@ package com.Auro.ProjektAuro.service.order;
 import lombok.Data;
 
 @Data
+public
 class OrderBerechnen {
 
     private double anzahlAktienAnteileAlt;
     private double buyInKursAlt;
     private double anzahlAktienAnteileNeu;
     private double buyInKursNeu;
+
+    public OrderBerechnen(){};
 
     public OrderBerechnen(double anzahlAktienAnteileAlt,
                         double buyInKursAlt,
