@@ -1,11 +1,8 @@
-package com.Auro.ProjektAuro.order;
+package com.Auro.ProjektAuro.service.order;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-
-import com.Auro.ProjektAuro.service.order.OrderBerechnen;
-
 
 public class OrderBerechnenTest {
 

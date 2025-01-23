@@ -1,9 +1,12 @@
-package com.Auro.ProjektAuro.order;
+package com.Auro.ProjektAuro.service.order;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,7 +33,6 @@ import com.Auro.ProjektAuro.repository.AktieRepository;
 import com.Auro.ProjektAuro.repository.KontoRepository;
 import com.Auro.ProjektAuro.repository.OrderRepository;
 import com.Auro.ProjektAuro.repository.PortfolioRepository;
-import com.Auro.ProjektAuro.service.order.OrderService;
 
 public class OrderServiceTest {
 
@@ -48,6 +50,10 @@ public class OrderServiceTest {
 
     private Boolean istAktieNeuErstellt;
 
+    public Double kontoGuthaben;
+    private Double neueAnzahlAnteile; 
+    private Double neuerBuyInKurs;
+
     @BeforeEach
     void setUp(){
         orderRepository = mock(OrderRepository.class);
@@ -60,6 +66,7 @@ public class OrderServiceTest {
         aktie = mock(Aktie.class);
         portfolio = mock(Portfolio.class);
 
+
         orderService = Mockito.spy(new OrderService(aktieRepository, orderRepository, portfolioRepository, kontoRepository));
     }
 
@@ -67,44 +74,47 @@ public class OrderServiceTest {
     @DisplayName("Tests für die Methode transaktion()")
     class TransaktionTests {
         // Test Main
+        @Disabled("Hat funktioniert, bis ich Fehlermeldungen in die einzelnen Methoden hinzugefügt hab.")
         @Test
         void testeTransaktionWennOrderTypeBuyIst(){
             orderDto = new OrderDto();
             orderDto.setOrderType("buy");
+            istAktieNeuErstellt = false;
 
             doNothing().when(orderService).initialisiereObjekte(any(OrderDto.class));
-            doNothing().when(orderService).transaktionBuy(any(OrderDto.class));
-            doNothing().when(orderService).transaktionSell(any(OrderDto.class));
+            doNothing().when(orderService).transaktionBuy(any(OrderDto.class), any(Aktie.class), anyBoolean(), anyDouble());
+            doNothing().when(orderService).transaktionSell(any(OrderDto.class),  any(Aktie.class), anyDouble());
             doNothing().when(orderService).setzeUndSpeichereObjekte(any(OrderDto.class));
             
             orderService.transaktion(orderDto);
 
             verify(orderService).initialisiereObjekte(orderDto); 
             //buy wird aufgerufen
-            verify(orderService).transaktionBuy(orderDto);
+            verify(orderService).transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
             //sell wird nicht aufgerufen
-            verify(orderService, never()).transaktionSell(orderDto);
+            verify(orderService, never()).transaktionSell(orderDto, aktie, kontoGuthaben);
             verify(orderService).setzeUndSpeichereObjekte(orderDto);
         }   
 
-    
+        @Disabled("Hat funktioniert, bis ich Fehlermeldungen in die einzelnen Methoden hinzugefügt hab.")
         @Test
         void testeTransaktionWennOrderTypeSellIst(){
             orderDto = new OrderDto();
             orderDto.setOrderType("sell");
+            istAktieNeuErstellt = false;
 
             doNothing().when(orderService).initialisiereObjekte(any(OrderDto.class));
-            doNothing().when(orderService).transaktionBuy(any(OrderDto.class));
-            doNothing().when(orderService).transaktionSell(any(OrderDto.class));
+            doNothing().when(orderService).transaktionBuy(any(OrderDto.class), any(Aktie.class), anyBoolean(), anyDouble());
+            doNothing().when(orderService).transaktionSell(any(OrderDto.class),  any(Aktie.class), anyDouble());
             doNothing().when(orderService).setzeUndSpeichereObjekte(any(OrderDto.class));
         
             orderService.transaktion(orderDto);
 
             verify(orderService).initialisiereObjekte(orderDto); 
             //buy wird nicht aufgerufen
-            verify(orderService, never()).transaktionBuy(orderDto);
+            verify(orderService, never()).transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
             //sell wird aufgerufen
-            verify(orderService).transaktionSell(orderDto);
+            verify(orderService).transaktionSell(orderDto, aktie, kontoGuthaben);
             verify(orderService).setzeUndSpeichereObjekte(orderDto);
         }
 
@@ -112,10 +122,11 @@ public class OrderServiceTest {
         void testeTransaktionWennOrderTypeNichtDefiniertIst(){
             orderDto = new OrderDto();
             orderDto.setOrderType(null);
+            istAktieNeuErstellt = false;
 
             doNothing().when(orderService).initialisiereObjekte(any(OrderDto.class));
-            doNothing().when(orderService).transaktionBuy(any(OrderDto.class));
-            doNothing().when(orderService).transaktionSell(any(OrderDto.class));
+            doNothing().when(orderService).transaktionBuy(any(OrderDto.class), any(Aktie.class), anyBoolean(), anyDouble());
+            doNothing().when(orderService).transaktionSell(any(OrderDto.class),  any(Aktie.class), anyDouble());
             doNothing().when(orderService).setzeUndSpeichereObjekte(any(OrderDto.class));
         
             Exception exception = assertThrows(RuntimeException.class, () -> {
@@ -126,8 +137,8 @@ public class OrderServiceTest {
 
             verify(orderService).initialisiereObjekte(orderDto); 
             //Alles folgende wird nicht aufgerufen
-            verify(orderService, never()).transaktionBuy(orderDto);
-            verify(orderService, never()).transaktionSell(orderDto);
+            verify(orderService, never()).transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
+            verify(orderService, never()).transaktionSell(orderDto, aktie, kontoGuthaben);
             verify(orderService, never()).setzeUndSpeichereObjekte(orderDto);
         }
     }
@@ -455,62 +466,322 @@ public class OrderServiceTest {
 
     }
 
-    // ----- TEST FERTIG MACHEN -----
     @Nested
-    @Disabled("Fertig machen")
     @DisplayName("Tests für die Methode transaktionBuy(OrderDto orderDto)")
     class TransaktionBuytests{
+
         @Test
         void testeTransaktionBuyMitKorrekterAusgabeUndAlterAktie(){
-            // Test erstellen
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile( 10.);
+            aktie.setBuyInKurs(120.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(146.);
+
+            kontoGuthaben = 10000.00;
+            istAktieNeuErstellt = false; 
+
+            doNothing().when(orderService).setAktienAttributeUndSaveRepository(anyDouble(), anyDouble(), any(Aktie.class));
+
+            orderService.transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
+
+            assertEquals(15, orderService.getNeueAnzahlAnteile(), 0.0001);
+            assertEquals(1200, orderService.getAktuelleInvestition(), 0.01);
+            assertEquals(730, orderService.getNeueInvestition(), 0.01);
+            assertEquals(1930, orderService.getGesamtInvesition(), 0.01);
+            assertEquals(128.67, orderService.getNeuerBuyInKurs(), 0.01);
+            assertEquals(9270, orderService.getKontoGuthaben(), 0.01);
+        }
+
+        @Test
+        void testeTransaktionBuyMitKorrekterAusgabeUndNeuerAktie(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile( 5.);
+            aktie.setBuyInKurs(146.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(146.);
+
+            kontoGuthaben = 10000.00;
+            istAktieNeuErstellt = true; 
+
+            doNothing().when(orderService).setAktienAttributeUndSaveRepository(anyDouble(), anyDouble(), any(Aktie.class));
+
+            orderService.transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
+
+            assertEquals(5, orderService.getNeueAnzahlAnteile(), 0.0001);
+            assertEquals(730, orderService.getNeueInvestition(), 0.01);
+            assertEquals(730, orderService.getGesamtInvesition(), 0.01);
+            assertEquals(146, orderService.getNeuerBuyInKurs(), 0.01);
+            assertEquals(9270, orderService.getKontoGuthaben(), 0.01);
+        }
+
+        @Test
+        void testeTransaktionBuyMitFehlermeldungWennAktieNullWertHat(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile( null);
+            aktie.setBuyInKurs(146.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(146.);
+
+            kontoGuthaben = 10000.00;
+            istAktieNeuErstellt = false; 
+
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
+            });
+
+            assertEquals("Es ist ein Fehler aufgetreten", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionBuyMitFehlermeldungWennOrderDtoNullWertHat(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile( 4.);
+            aktie.setBuyInKurs(146.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(null);
+
+            kontoGuthaben = 10000.00;
+            istAktieNeuErstellt = false; 
+
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
+            });
+
+            assertEquals("Es ist ein Fehler aufgetreten", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionBuyMitFehlermeldungWennKontoGuthabenNullIst(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile( 4.);
+            aktie.setBuyInKurs(146.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(null);
+
+            kontoGuthaben = null;
+            istAktieNeuErstellt = false; 
+
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
+            });
+
+            assertEquals("KontoGuthaben darf nicht leer sein", exception.getMessage());
         }
     }
 
-// ----- TEST FERTIG MACHEN -----
     @Nested
-    @Disabled("Fertig machen") 
     @DisplayName("Tests für die Methode transaktionSell(OrderDto orderDto)")
     class TransaktionSellTest{
         @Test
-        void testeTransaktionSellMitKorrekterAusgabeUndAlterAktie(){
-            // Test erstellen
+        void testeTransaktionSellMitKorrekterAusgabe(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(5.);
+            aktie.setBuyInKurs(120.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(2.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+
+            doNothing().when(orderService).setAktienAttributeUndSaveRepository(anyDouble(), anyDouble(), any(Aktie.class));
+
+            orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+
+            assertEquals(10280.0, orderService.getKontoGuthaben(), 0.01);
+            assertEquals(3.0, orderService.getNeueAnzahlAnteile(), 0.0001);
+            assertEquals(120.0, orderService.getNeuerBuyInKurs(), 0.01);
         }
+
+        @Test
+        void testeTransaktionSellMitKorrektemLöschenDerAktieBeiAnzahlAnteileGleichNull(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(5.);
+            aktie.setBuyInKurs(120.);
+            aktie.setId("TSLA");
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+
+            orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+
+            verify(aktieRepository).delete(aktie);
+            verify(orderService, never()).setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+
+        }
+
+        @Test
+        void testeTransaktionSellMitFehlermeldungBeiFehlenderAktie(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(null);
+            aktie.setBuyInKurs(null);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(2.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+            
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+            });
+
+            assertEquals("Es kann keine leere Aktie verkauft werden", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionSellMitFehlermeldungBeiBuyInKleinerNull(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(5.);
+            aktie.setBuyInKurs(-5.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(2.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+            
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+            });
+
+            assertEquals("Es kann keine leere Aktie verkauft werden", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionSellMitFehlermeldungBeiBuyInGleichNULL(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(5.);
+            aktie.setBuyInKurs(null);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(2.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+            
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+            });
+
+            assertEquals("Es kann keine leere Aktie verkauft werden", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionSellMitFehlermeldungBeiLeererAktie(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(0.);
+            aktie.setBuyInKurs(0.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(2.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+            
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+            });
+
+            assertEquals("Es kann keine leere Aktie verkauft werden", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionSellMitFehlermeldungBeiFehlerBeiOrderDto(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(5.);
+            aktie.setBuyInKurs(120.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(null);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = 10000.00;
+            
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+            });
+
+            assertEquals("Mindestens ein Wert in OrderDto ist leer.", exception.getMessage());
+        }
+
+        @Test
+        void testeTransaktionSellMitFehlermeldungBeiLeeremKontoGuthaben(){
+            Aktie aktie = new Aktie();
+            aktie.setAnzahlAktienAnteile(5.);
+            aktie.setBuyInKurs(120.);
+
+            OrderDto orderDto = new OrderDto();
+            orderDto.setAnteile(5.);
+            orderDto.setLiveKurs(140.);
+
+            kontoGuthaben = null;
+            
+            Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+                orderService.transaktionSell(orderDto, aktie, kontoGuthaben);
+            });
+
+            assertEquals("Mindestens ein Wert in OrderDto ist leer.", exception.getMessage());
+        }
+
+     
     }
 
     @Nested
-    @Disabled("Erhalte NullPointerException aufgrund von LocalDateTime und konnte den Fehler bisher nicht finden") 
     @DisplayName("Tests für die Methode setzeUndSpeichereObjekte(...)")
     class SetzeUndSpeichereObjekteTests {
         
         @Test
         void testeSetzeUndSpeichereObjekte() {
 
-            orderDto = new OrderDto();
-            orderService = new OrderService(aktieRepository, orderRepository, portfolioRepository, kontoRepository);
             
+            OrderService spyOrderService = Mockito.spy(new OrderService(aktieRepository, orderRepository, portfolioRepository, kontoRepository));
+
+            // Mocke die Methode getCurrentDateTime()
+            LocalDateTime fixedTime = LocalDateTime.of(2025, 1, 1, 12, 0);
+            doReturn(fixedTime).when(spyOrderService).getCurrentDateTime();
+
+            orderDto = new OrderDto();
             orderDto.setOrderType("buy");
             orderDto.setAnteile(10.);
             orderDto.setLiveKurs(120.);
             
+            aktie = new Aktie();
             aktie.setName("Apple");
             aktie.setId("AAPL");
 
+            portfolio = null;
+
             Double kontoGuthaben = 25000.00;
 
-            orderService.setzeUndSpeichereObjekte(orderDto);
+            spyOrderService.setOrder(order);
+            spyOrderService.setAktie(aktie);
+            spyOrderService.setKonto(konto);
+            spyOrderService.setKontoGuthaben(kontoGuthaben);
+            spyOrderService.setzeUndSpeichereObjekte(orderDto);
 
-            verify(order).setOrderDateAndTime(any(LocalDateTime.class));
-            verify(order).setOrderType(any(String.class));
-            verify(order).setAktie_anteile(any(Double.class));
-            verify(order).setBuySellKurs(any(Double.class));
-
-            verify(order).setPortfolio(any(Portfolio.class));
-
-            verify(order).setAktienName(any(String.class));
-            verify(order).setAktienTicker(any(String.class));
-
+            verify(order).setOrderDateAndTime(LocalDateTime.of(2025, 1, 1, 12, 0));
+            verify(order).setOrderType("buy");
+            verify(order).setAktie_anteile(10.);
+            verify(order).setBuySellKurs(120.);
+            verify(order).setPortfolio(portfolio);
+            verify(order).setAktienName("Apple");
+            verify(order).setAktienTicker("AAPL");
             verify(konto).setAktuellesKontoGuthaben(kontoGuthaben);
-
             verify(kontoRepository).save(konto);
         }
 

@@ -17,5 +17,8 @@ public interface PortfolioRepository extends JpaRepository<Portfolio,Integer>{
 
     @Query("SELECT o FROM Order o WHERE o.portfolio.id = :id")
     List<Order> findAllOrdersById(@Param("id") Integer id);
+
+    @Query("SELECT o FROM Portfolio o WHERE o.id = :id")
+    Object getAlleOrdersById(@Param("id") Integer id);
    
 }

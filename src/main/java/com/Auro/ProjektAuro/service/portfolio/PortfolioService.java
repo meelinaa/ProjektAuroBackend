@@ -15,7 +15,6 @@ import com.Auro.ProjektAuro.repository.PortfolioRepository;
 @Service
 public class PortfolioService {
 
-    @Autowired
     public PortfolioRepository portfolioRepository;
 
     @Autowired
@@ -24,20 +23,44 @@ public class PortfolioService {
     @Autowired
     public AktieRepository aktieRepository;
 
+    public PortfolioService(PortfolioRepository portfolioRepository) {
+        this.portfolioRepository = portfolioRepository;
+    }
+
     public Portfolio getPortfolioById(Integer id) {
-        return portfolioRepository.findById(id).orElse(null);
+        if (id == null) {
+            throw new IllegalStateException("Es wurde keine gültige ID weitergegeben.");
+        }
+        try {
+            return portfolioRepository.findById(id).orElse(null);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Portfolio konnte nicht gefunden werden");
+        }
     }
 
     public List<Aktie> getAllAktienById(Integer portfolioId) {
-        List<Aktie> alleAktien = portfolioRepository.findAllAktienById(portfolioId);
+        if (portfolioId == null) {
+            throw new IllegalStateException("Es wurde keine gültige ID weitergegeben.");
+        }
+        try {
+            List<Aktie> alleAktien = portfolioRepository.findAllAktienById(portfolioId);
+            return alleAktien;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Es konnten keine Aktien gefunden werden");
+        }
 
-        return alleAktien;
     }
     
     public List<Order> getAlleOrdersByID(Integer portfolioId) {
-        List<Order> alleOrder = portfolioRepository.findAllOrdersById(portfolioId);
-
-        return alleOrder;
+        if (portfolioId == null) {
+            throw new IllegalStateException("Es wurde keine gültige ID weitergegeben.");
+        }
+        try {
+            List<Order> alleOrder = portfolioRepository.findAllOrdersById(portfolioId);
+            return alleOrder;
+        } catch (Exception e) {
+            throw new RuntimeException("Es konnten keine Transaktionen gefunden werden");
+        }
     }
    
 }

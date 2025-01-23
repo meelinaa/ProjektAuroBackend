@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16
@@ -12,10 +10,25 @@ services:
       POSTGRES_PASSWORD: passwordAuro
       POSTGRES_DB: databaseAuro
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data 
+      - ./init:/docker-entrypoint-initdb.d/   
+
+  flyway:
+    image: flyway/flyway:latest
+    container_name: flyway_migration
+    depends_on:
+      - postgres
+    command: >
+      -url=jdbc:postgresql://auro_postgres:5432/databaseAuro
+      -user=Auro1234
+      -password=passwordAuro
+      migrate
+    volumes:
+      - ./sql:/flyway/sql  # Hier liegen deine SQL-Migrationsskripte
 
 volumes:
   postgres_data:
+
 
 
 #Docker Starten

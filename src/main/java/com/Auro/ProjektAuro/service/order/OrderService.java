@@ -16,7 +16,10 @@ import com.Auro.ProjektAuro.repository.KontoRepository;
 import com.Auro.ProjektAuro.repository.OrderRepository;
 import com.Auro.ProjektAuro.repository.PortfolioRepository;
 
+import lombok.Data;
+
 @Service
+@Data
 @Scope("prototype")
 public class OrderService {
 
@@ -26,18 +29,18 @@ public class OrderService {
     private Portfolio portfolio;
 
     public Double kontoGuthaben;
-    private Double neueAnzahlAnteile; 
-    private Double aktuelleInvestition;
-    private Double neueInvestition;
-    private Double gesamtInvesition;
-    private Double neuerBuyInKurs;
+    public Double neueAnzahlAnteile; 
+    public Double aktuelleInvestition;
+    public Double neueInvestition;
+    public Double gesamtInvesition;
+    public Double neuerBuyInKurs;
 
     private AktieRepository aktieRepository;
     private OrderRepository orderRepository;
     private PortfolioRepository portfolioRepository;
     private KontoRepository kontoRepository;
 
-    private Boolean istAktieNeuErstellt;
+    public Boolean istAktieNeuErstellt;
 
     public OrderService( AktieRepository aktieRepository, OrderRepository orderRepository, PortfolioRepository portfolioRepository, KontoRepository kontoRepository){
         this.aktieRepository = aktieRepository;
@@ -48,14 +51,20 @@ public class OrderService {
 
     // Main
     public void transaktion(OrderDto orderDto) {
+        setAktie(null);
+        setNeueAnzahlAnteile(null);
+        setAktuelleInvestition(null);
+        setNeueInvestition(null);
+        setGesamtInvesition(null);
+        setNeuerBuyInKurs(null);
+
         initialisiereObjekte(orderDto); 
-        istAktieNeuErstellt = false;
         
         if ("buy".equals(orderDto.getOrderType())) {
-            transaktionBuy(orderDto);
+            transaktionBuy(orderDto, aktie, istAktieNeuErstellt, kontoGuthaben);
         } 
         else if("sell".equals(orderDto.getOrderType())){
-            transaktionSell(orderDto);
+            transaktionSell(orderDto, aktie, kontoGuthaben);
         } else {
             throw new RuntimeException("Ungültiger OrderType: " + orderDto.getOrderType());
         }
@@ -72,7 +81,6 @@ public class OrderService {
         }
     }
     
-
     // Hilfsmethoden
     public void initialisiereObjekte(OrderDto orderDto){
         if (orderDto == null 
@@ -96,6 +104,7 @@ public class OrderService {
         portfolio = portfolioRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Portfolio mit ID 1 nicht gefunden"));
 
+        istAktieNeuErstellt = false;
         aktie = aktieRepository.findById(orderDto.getTicker())
             .orElseGet(() -> {
                 Aktie newAktie = new Aktie();
@@ -109,40 +118,66 @@ public class OrderService {
             }); 
     }
 
-    public void transaktionBuy(OrderDto orderDto){
-        if(!istAktieNeuErstellt){
-            neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
-            aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
-            neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
-            gesamtInvesition = aktuelleInvestition + neueInvestition;
-            neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
-        }else{
-            neueAnzahlAnteile = orderDto.getAnteile();
-            neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
-            gesamtInvesition =  neueInvestition;
-            neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+    public void transaktionBuy(OrderDto orderDto, Aktie aktie, Boolean istAktieNeuErstellt, Double kontoGuthaben){
+        if (kontoGuthaben == null) {
+            throw new IllegalArgumentException("KontoGuthaben darf nicht leer sein");   
         }
-
-        //Konto: Guthaben abziehen
-        kontoGuthaben -= neueInvestition;
-        setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+        try {
+            if(!istAktieNeuErstellt){
+                neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() + orderDto.getAnteile();
+                aktuelleInvestition = aktie.getBuyInKurs() * aktie.getAnzahlAktienAnteile();
+                neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
+                gesamtInvesition = aktuelleInvestition + neueInvestition;
+                neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+            }else{
+                neueAnzahlAnteile = orderDto.getAnteile();
+                neueInvestition = orderDto.getAnteile() * orderDto.getLiveKurs();
+                gesamtInvesition =  neueInvestition;
+                neuerBuyInKurs = gesamtInvesition / neueAnzahlAnteile;
+            }
+    
+            //Konto: Guthaben abziehen
+            kontoGuthaben -= neueInvestition;
+            setKontoGuthaben(kontoGuthaben);
+            setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Es ist ein Fehler aufgetreten");
+        }
+        
+        
     }
 
-    public void transaktionSell(OrderDto orderDto){
-        neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() - orderDto.getAnteile();
-        neuerBuyInKurs = aktie.getBuyInKurs();
-
-        //Konto: Guthaben hinzufügen
-        double verkauf = orderDto.getAnteile() * orderDto.getLiveKurs();
-        kontoGuthaben += verkauf;
-
-        if (neueAnzahlAnteile == 0) {
-            aktieRepository.delete(aktie);
-            System.out.println("Aktie gelöscht: " + aktie.getId());
-            return; 
+    public void transaktionSell(OrderDto orderDto, Aktie aktie, Double kontoGuthaben){
+        
+        if (aktie.getAnzahlAktienAnteile() == null 
+            || aktie.getAnzahlAktienAnteile() <= 0 
+            || aktie.getBuyInKurs() == null 
+            || aktie.getBuyInKurs() <= 0) {
+            throw new IllegalArgumentException("Es kann keine leere Aktie verkauft werden");
         }
+        try {
+            neueAnzahlAnteile = aktie.getAnzahlAktienAnteile() - orderDto.getAnteile();
+            neuerBuyInKurs = aktie.getBuyInKurs();
 
-        setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+            setNeueAnzahlAnteile(neueAnzahlAnteile);
+            setNeuerBuyInKurs(neuerBuyInKurs);
+
+            //Konto: Guthaben hinzufügen
+            double verkauf = orderDto.getAnteile() * orderDto.getLiveKurs();
+            kontoGuthaben += verkauf;
+            setKontoGuthaben(kontoGuthaben);
+
+            if (neueAnzahlAnteile == 0) {
+                aktieRepository.delete(aktie);
+                System.out.println("Aktie gelöscht: " + aktie.getId());
+                return; 
+            }
+
+            setAktienAttributeUndSaveRepository(neuerBuyInKurs, neueAnzahlAnteile, aktie);
+        }  catch (Exception e) {
+            throw new IllegalArgumentException("Mindestens ein Wert in OrderDto ist leer.");
+        }
+        
     }
 
     public void setAktienAttributeUndSaveRepository(Double neuerBuyInKurs, Double neueAnzahlAnteile, Aktie aktie){
@@ -152,14 +187,16 @@ public class OrderService {
         aktieRepository.save(aktie);
     }
 
+    public LocalDateTime getCurrentDateTime() {
+        return LocalDateTime.now();
+    }
+
     public void setzeUndSpeichereObjekte(OrderDto orderDto){
-        order.setOrderDateAndTime(LocalDateTime.now());
+        order.setOrderDateAndTime(getCurrentDateTime());
         order.setOrderType(orderDto.getOrderType());
         order.setAktie_anteile(orderDto.getAnteile());
         order.setBuySellKurs(orderDto.getLiveKurs());
-
         order.setPortfolio(portfolio);
-
         order.setAktienName(aktie.getName());
         order.setAktienTicker(aktie.getId());
     
