@@ -2,6 +2,7 @@ package com.Auro.ProjektAuro.service.portfolio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
@@ -19,7 +19,6 @@ import com.Auro.ProjektAuro.model.Order;
 import com.Auro.ProjektAuro.model.Portfolio;
 import com.Auro.ProjektAuro.repository.PortfolioRepository;
 
-@Disabled("Fertig machen")
 public class PortfolioServiceTest {
 
     PortfolioRepository portfolioRepository;
@@ -33,16 +32,9 @@ public class PortfolioServiceTest {
 
     @BeforeEach
     void setUp() {
-        // die anderen repositories auch einfügen in das neu Perotolio service indem ich das
-        // in den konstruktor einfüge
-        // dann sollte der fehler weg sein, dass ich dann die returns dann auch testen kann.
         portfolioRepository = mock(PortfolioRepository.class);
         portfolio = mock(Portfolio.class);
-        portfolioRepository = mock(PortfolioRepository.class);
         portfolioService = new PortfolioService(portfolioRepository);
-
-        aktie = mock(Aktie.class);
-        order = mock(Order.class);
     }
 
     @Nested
@@ -51,19 +43,18 @@ public class PortfolioServiceTest {
 
         @Test
         void getPortfolioByIdTestenMitKorrektemAuswurf() {
-            // Mocking: Repository liefert ein Optional mit Portfolio
             when(portfolioRepository.findById(id)).thenReturn(Optional.of(portfolio));
 
-    // Service-Methode aufrufen
-    Portfolio result = portfolioService.getPortfolioById(id);
-
-    // Überprüfen, ob das Ergebnis korrekt ist
-    assertEquals(portfolio, result);
+            Portfolio result = portfolioService.getPortfolioById(id);
+                
+            assertEquals(portfolio, result);
         }
 
 
         @Test
-        void getPortfolioByIdTestenMitFehlerAusgabeWeilPortfolioNichtGefundenWurde(){
+        void getPortfolioByIdTestenMitFehlerAusgabeWeilPortfolioNichtGefundenWurde() {        
+            when(portfolioService.portfolioRepository.findById(anyInt())).thenThrow(new RuntimeException("Portfolio konnte nicht gefunden werden"));
+                
             Exception exception = assertThrows(RuntimeException.class, () -> {
                 portfolioService.getPortfolioById(id);
             });
@@ -71,9 +62,11 @@ public class PortfolioServiceTest {
             assertEquals("Portfolio konnte nicht gefunden werden", exception.getMessage());
         }
 
+
         @Test
         void getPortfolioByIdTestenMitFehlerAusgabeWeilIDLeerIst(){
             id = null;
+                        
             Exception exception = assertThrows(IllegalStateException.class, () -> {
                 portfolioService.getPortfolioById(id);
             });
@@ -88,15 +81,35 @@ public class PortfolioServiceTest {
 
         @Test
         void getAlleAktienByIdMitKorrekterAusgabe(){
-            List<Aktie> listeAktie = List.of(aktie);
+            Aktie aktie1 = new Aktie();
+            aktie1.setId("AAPL");
+            aktie1.setName("Apple");
+            aktie1.setAnzahlAktienAnteile(10.0);
+            aktie1.setBuyInKurs(150.0);
+
+            Aktie aktie2 = new Aktie();
+            aktie2.setId("MSFT");
+            aktie2.setName("Microsoft");
+            aktie2.setAnzahlAktienAnteile(5.0);
+            aktie2.setBuyInKurs(250.0);
+
+            Aktie aktie3 = new Aktie();
+            aktie3.setId("GOOGL");
+            aktie3.setName("Google");
+            aktie3.setAnzahlAktienAnteile(7.0);
+            aktie3.setBuyInKurs(120.0);
+
+            List<Aktie> listeAktie = List.of(aktie1, aktie2, aktie3);
+
             when(portfolioRepository.findAllAktienById(id)).thenReturn(listeAktie);
 
-            assertEquals(listeAktie, portfolioRepository.findAllAktienById(id));;
+            assertEquals(listeAktie, portfolioService.getAllAktienById(id));;
         }
 
         @Test
         void getAlleAktienByIdMitFehlerAusgabeWennIdNullIst(){
             id = null;
+
             Exception exception = assertThrows(IllegalStateException.class, () -> {
                 portfolioService.getAllAktienById(id);
             });
@@ -106,6 +119,8 @@ public class PortfolioServiceTest {
 
         @Test
         void getAlleAktienByIdMitFehlerAusgabeWennAktienNichtGefundenWerden(){
+            when(portfolioService.portfolioRepository.findAllAktienById(anyInt())).thenThrow(new RuntimeException("Es konnten keine Aktien gefunden werden"));
+                
             Exception exception = assertThrows(RuntimeException.class, () -> {
                 portfolioService.getAllAktienById(id);
             });
@@ -121,10 +136,29 @@ public class PortfolioServiceTest {
 
         @Test
         void getAlleOrdersByIDMitKorrekterAusgabe(){
-            List<Order> listeOrder = List.of(order);
-            when(portfolioRepository.getAlleOrdersById(id)).thenReturn(listeOrder);
+            Order order1 = new Order();
+            order1.setId(1);
+            order1.setAktienName("Apple");
+            order1.setAktie_anteile(10.0);
+            order1.setBuySellKurs(120.0);
 
-            assertEquals(listeOrder, portfolioRepository.getAlleOrdersById(id));
+            Order order2 = new Order();
+            order2.setId(2);
+            order2.setAktienName("Microsoft");
+            order2.setAktie_anteile(5.0);          
+            order2.setBuySellKurs(250.0);
+
+            Order order3 = new Order();
+            order3.setId(3);
+            order3.setAktienName("Google");
+            order3.setAktie_anteile(7.0);
+            order3.setBuySellKurs(145.0);
+
+            List<Order> listeOrder = List.of(order1, order2, order3);
+
+            when(portfolioRepository.findAllOrdersById(id)).thenReturn(listeOrder);
+
+            assertEquals(listeOrder, portfolioService.getAlleOrdersByID(id));
         }
 
         @Test
@@ -139,6 +173,7 @@ public class PortfolioServiceTest {
 
         @Test
         void getAlleOrdersByIDMitFehlerAusgabeWennOrderNichtGefundenWerden(){
+            when(portfolioService.portfolioRepository.findAllOrdersById(anyInt())).thenThrow(new RuntimeException("Es konnten keine Transaktionen gefunden werden"));
             Exception exception = assertThrows(RuntimeException.class, () -> {
                 portfolioService.getAlleOrdersByID(id);
             });

@@ -2,26 +2,20 @@ package com.Auro.ProjektAuro.service.portfolio;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.Auro.ProjektAuro.model.Aktie;
 import com.Auro.ProjektAuro.model.Order;
 import com.Auro.ProjektAuro.model.Portfolio;
-import com.Auro.ProjektAuro.repository.AktieRepository;
-import com.Auro.ProjektAuro.repository.KontoRepository;
 import com.Auro.ProjektAuro.repository.PortfolioRepository;
 
+import lombok.Data;
+
 @Service
+@Data
 public class PortfolioService {
 
     public PortfolioRepository portfolioRepository;
-
-    @Autowired
-    public KontoRepository kontoRepository;
-
-    @Autowired
-    public AktieRepository aktieRepository;
 
     public PortfolioService(PortfolioRepository portfolioRepository) {
         this.portfolioRepository = portfolioRepository;
