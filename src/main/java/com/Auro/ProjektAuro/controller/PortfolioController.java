@@ -27,37 +27,58 @@ public class PortfolioController {
     private PortfolioService portfolioService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Portfolio> getPortfolio(@PathVariable String id) {
+    public ResponseEntity<Portfolio> getPortfolio(@PathVariable Integer id) {
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
         try{
-            Integer portfolioId = Integer.parseInt(id);
-            Portfolio portfolio = portfolioService.getPortfolioById(portfolioId);
+            Portfolio portfolio = portfolioService.getPortfolioById(id);
 
             if(portfolio != null){
                 return ResponseEntity.ok(portfolio);
             }else{
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
     
     @GetMapping("/aktien/get/{id}")
     public ResponseEntity<List<Aktie>> getAlleAktienFuerPortfolio(@PathVariable Integer id) {
-        List<Aktie> allePortfolioAktien = portfolioService.getAllAktienById(id);
-
-        return ResponseEntity.ok(allePortfolioAktien); 
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+        try {
+            List<Aktie> allePortfolioAktien = portfolioService.getAllAktienById(id);
+            if(allePortfolioAktien != null){
+                return ResponseEntity.ok(allePortfolioAktien); 
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        
     }
 
     @GetMapping("/order/get/{id}")
     public ResponseEntity<List<Order>>  getAlleOrderFuerPortfolio(@PathVariable Integer id) {
-        List<Order> allePortfolioOrder = portfolioService.getAlleOrdersByID(id);
-
-        if (allePortfolioOrder.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         }
+        try {
+            List<Order> allePortfolioOrder = portfolioService.getAlleOrdersByID(id);
+            if (allePortfolioOrder != null) {
+                return ResponseEntity.ok(allePortfolioOrder);
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
 
-        return ResponseEntity.ok(allePortfolioOrder);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        
     }
     
 }
