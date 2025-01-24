@@ -2,28 +2,19 @@ package com.Auro.ProjektAuro.external;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.Auro.ProjektAuro.model.Aktie;
-import com.Auro.ProjektAuro.model.Portfolio;
-import com.Auro.ProjektAuro.repository.PortfolioRepository;
 import com.Auro.ProjektAuro.service.external.AktienScrapping;
 import com.Auro.ProjektAuro.service.external.AktienScrappingDatenInfos;
 import com.Auro.ProjektAuro.service.external.AktienScrappingDatenLive;
 import com.Auro.ProjektAuro.service.external.AktienWebScrapping;
-import com.Auro.ProjektAuro.service.portfolio.PortfolioService;
 
 public class AktienScrappingTest {
 
