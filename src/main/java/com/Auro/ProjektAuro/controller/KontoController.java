@@ -28,15 +28,15 @@ public class KontoController {
     public ResponseEntity<Double> getGuthaben() {
         try{
             Double guthaben = kontoService.getKontoGuthaben();
-            Double roundedGuthaben = BigDecimal.valueOf(guthaben)
+            if (guthaben != null) {
+                Double roundedGuthaben = BigDecimal.valueOf(guthaben)
                                    .setScale(2, RoundingMode.HALF_UP)
                                    .doubleValue();
-            if (guthaben != null) {
                 return ResponseEntity.ok(roundedGuthaben);
             } else {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
