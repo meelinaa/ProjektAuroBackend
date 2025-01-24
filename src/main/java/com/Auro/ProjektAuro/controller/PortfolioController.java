@@ -8,6 +8,9 @@ import com.Auro.ProjektAuro.model.Order;
 import com.Auro.ProjektAuro.model.Portfolio;
 import com.Auro.ProjektAuro.service.portfolio.PortfolioService;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -17,13 +20,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/portfolio")
+@AllArgsConstructor
+@NoArgsConstructor
 public class PortfolioController {
 
     private PortfolioService portfolioService;
-
-    public PortfolioController(PortfolioService portfolioService){
-        this.portfolioService = portfolioService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Portfolio> getPortfolio(@PathVariable String id) {

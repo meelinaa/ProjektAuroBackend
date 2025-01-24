@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Auro.ProjektAuro.service.konto.KontoService;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -15,13 +18,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/konto")
+@AllArgsConstructor
+@NoArgsConstructor
 public class KontoController {
     
     private KontoService kontoService;
-
-    public KontoController(KontoService kontoService){
-        this.kontoService = kontoService;
-    }
 
     @GetMapping("/guthaben")
     public ResponseEntity<Double> getGuthaben() {

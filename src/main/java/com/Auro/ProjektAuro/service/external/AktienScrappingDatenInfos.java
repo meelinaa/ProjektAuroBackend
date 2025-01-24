@@ -1,8 +1,12 @@
 package com.Auro.ProjektAuro.service.external;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AktienScrappingDatenInfos {
     
     private String companyName;
@@ -13,27 +17,6 @@ public class AktienScrappingDatenInfos {
     private String trailingPE;
     private String targetMeanPrice;
     private String expectedDividend;
-    private String ticker;
+    private String ticker; 
 
-    public AktienScrappingDatenInfos(String companyName,
-                                String regularMarketDayRange,
-                                String fiftyTwoWeekRange,
-                                String regularMarketVolume,
-                                String marketCap,
-                                String trailingPE,
-                                String targetMeanPrice,
-                                String expectedDividend,
-                                String ticker)
-    {
-        this.companyName = companyName;
-        this.regularMarketDayRange = regularMarketDayRange;
-        this.fiftyTwoWeekRange = fiftyTwoWeekRange;
-        this.regularMarketVolume = regularMarketVolume;
-        this.marketCap = marketCap;
-        this.trailingPE = trailingPE;
-        this.targetMeanPrice = targetMeanPrice;
-        this.expectedDividend = expectedDividend;
-        this.ticker = ticker;
-    }
-    
 }
